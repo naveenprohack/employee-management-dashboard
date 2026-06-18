@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 1. MongoDB Database Container
+  mongodb:
+    image: mongo:latest
+    container_name: mern_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Express Backend Container
+  backend:
+    build: ./server # Tells Docker to look inside your 'server' folder
+    container_name: mern_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/employee_management
+      - JWT_SECRET=your_super_secret_interview_key_123
+    depends_on:
+      - mongodb
+
+  # 3. Vite/React Frontend Container
+  frontend:
+    build: . # Tells Docker that the frontend files are right here in the root folder
+    container_name: mern_frontend
+    ports:
+      - "5173:5173" # Maps Vite default port to your local machine
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    stdin_open: true
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
